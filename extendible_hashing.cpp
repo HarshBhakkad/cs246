@@ -5,14 +5,13 @@ using namespace std;
 class Bucket
 {
 private:
-    int local_depth;
+    /* data */
+    int local_depth ;
     int size;
-    int* data = new int(size); 
+    int *data = new int[size];
 public:
-    Bucket
-(int ,int);
-    ~Bucket
-();
+    Bucket(int , int);
+    ~Bucket();
 };
 
 Bucket::Bucket(int ld , int sz)
@@ -25,48 +24,49 @@ Bucket::~Bucket()
 {
 }
 
-
-class Hash_Table
+class hashtable
 {
 private:
+    /* data */
     int global_depth;
-    int b_capacity;
-    vector<Bucket> bcks;
+    int size;
+    int occupancy = 0;
+    vector<Bucket*> directory;
 public:
-    Hash_Table(int,int);
-    ~Hash_Table();
-    insert(int);
-    Bucket create_bucket_obj();
+    hashtable(int , int);
+    ~hashtable();
+    Bucket* createBucketPointer(int ,int);
+    insert(int );
 };
 
-Hash_Table::Hash_Table(int gd , int buck_cap)
-{ 
+hashtable::insert(int value)
+
+hashtable::hashtable(int gd , int sz)
+{
     global_depth = gd;
-    b_capacity = buck_cap;
-    for(int i =0 ; i < (int)pow(2,gd) ; i++){
-        bcks.push_back(create_bucket_obj());
+    size = sz;
+    for(int i =0 ; i < (int)pow(2,gd); i++){
+        directory.push_back(createBucketPointer(gd,sz));
     }
 }
 
-Hash_Table::~Hash_Table()
+hashtable::~hashtable()
 {
 }
 
-Hash_Table::insert(int val){
-    
+Bucket* hashtable::createBucketPointer(int gd,int sz){
+    Bucket* obj = new Bucket(gd,sz);
+     return obj;
 }
 
-Bucket Hash_Table::create_bucket_obj(){
-    Bucket* obj = new Bucket(global_depth,b_capacity);
-    return *obj;
-}
+
 
 
 int main(){
     int global_depth ;
     int b_capacity ;
     cin >> global_depth >> b_capacity;
-    Hash_Table hash_obj(global_depth,b_capacity);
+    hashtable hash_obj(global_depth,b_capacity);
     while (true){
         int option ;
         cin >> option;
