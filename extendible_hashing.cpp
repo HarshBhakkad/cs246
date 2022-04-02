@@ -4,13 +4,13 @@ using namespace std;
 
 class Bucket
 {
-private:
+public:
     /* data */
     int local_depth ;
     int size;
     vector<int> data ;
     int occupancy ;
-public:
+
     Bucket(int , int);
     ~Bucket();
 
@@ -30,7 +30,7 @@ public:
     }
 
     bool delete_(int value){
-        vector<int>iterator:: it;
+        vector<int>::iterator it;
         for(auto it = data.begin();it != data.end(); ++it){
             if(*it == value){
                 data.erase(it);
@@ -58,7 +58,7 @@ private:
     /* data */
     int global_depth;
     int size;
-    int occupancy = 0;
+    
     vector<Bucket*> directory;
 public:
     hashtable(int , int);
@@ -69,6 +69,27 @@ public:
     ~hashtable();
     Bucket* createBucketPointer(int ,int);
     bool insert(int );
+    bool delete_(int value){
+        int hashkey = hash(value);
+        return (directory[hashkey]->delete_(value));
+    }
+
+    bool search(int value){
+        int hv = hash(value);
+       bool ans = directory[hv]->search(value);
+        return ans;
+    }
+
+    void display(){
+        for(int i =0 ; i < directory.size(); i++){
+            cout << "Directory no:" << i << endl;
+            cout << "Directory occupancy" << directory[i]->occupancy << endl;
+            for(int j = 0 ; j <  directory[i]->occupancy; j++){
+                cout << directory[i]->data[j] << " " ;
+            }
+            cout << endl;
+        }
+    }
 };
 
 bool hashtable::insert(int value){
@@ -77,17 +98,18 @@ bool hashtable::insert(int value){
     if(status == -1){
         if(directory[hv]->local_depth == global_depth){
             global_depth++;
+            directory[hv]->local_depth++;
             int newhv = hash(value);
-            for(int i =0 ; i < (1<<global_depth) ; i++){
+            for(int i =0 ; i < (1<<(global_depth-1)) ; i++){
                 if( i == hv){
                     directory.push_back(createBucketPointer(global_depth,size));
                 }
                 else{
-                directory.push_back(createBucketPointer(global_depth-1,size));
+                directory.push_back(directory[i]);
                 }
             }
             // hv = hash(value);
-            
+            // sorting the buckets newly formed.
             for(int i = 0 ; i < size ; i++){
                int temp= directory[hv]->data[i];
                int temphv = hash(temp);
@@ -96,9 +118,23 @@ bool hashtable::insert(int value){
                    directory[newhv]->insert(temp);
                }
             }
+            cout << "New bucket created" << endl;
+            insert(value);
+            return true;
         }
         else{
-
+            int newhv = hv + (1<<(global_depth-1));
+            directory[hv]->local_depth++;
+            for(int i = 0 ; i < size ; i++){
+                int temp = directory[hv]->data[i];
+                int temphv = hash(temp);
+                if(temphv != hv){
+                   directory[hv]->delete_(temp);
+                   directory[newhv]->insert(temp);
+               }
+            }
+            insert(value);
+            return true;
         }
     }
     else{
@@ -137,18 +173,32 @@ int main(){
         cin >> option;
         if(option == 2){
             //insert
+            int val;
+            cin >> val;
+            bool ans =hash_obj.insert(val);
+            cout << ans << endl;
         }
         else if (option == 3)
         {
             //search
+            int val;
+            cin >> val;
+            bool ans = hash_obj.search(val);
+            cout << ans << endl;
         }
         else if (option == 4)
         {
             //delete
+            int val;
+            cin >> val;
+
+            bool ans = hash_obj.delete_(val);
+            cout << ans << endl;
         }
         else if (option == 5)
         {
             //display status
+            hash_obj.display();
         }
         else if (option == 6)
         {
