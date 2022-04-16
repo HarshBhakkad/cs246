@@ -1,1 +1,1 @@
-# cs246
+# CS246 Assignments
